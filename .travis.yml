@@ -1,0 +1,29 @@
+sudo: required
+dist: trusty
+
+language: node_js
+node_js:
+  - '4.5'
+
+install:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+  - sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+  - sudo apt-get update -q
+  - sudo apt-get install -q google-chrome-stable
+  - sudo apt-get install lynx
+  
+before_script:
+  - npm install protractor -g
+  - npm install coveralls 
+  - npm install 
+  - sleep 3
+
+script:
+  - npm run test-single-run
+  - (npm start > /dev/null &)  && (npm run protractor)
+
+after_script:  
+- cat coverage/lcov.info | node_modules/coveralls/bin/coveralls.js && rm -rf coverage
+- python html2text.py http://localhost/home/travis/build/baraneetharan/employee/report/Clientside-Report/Unittest/units.html
